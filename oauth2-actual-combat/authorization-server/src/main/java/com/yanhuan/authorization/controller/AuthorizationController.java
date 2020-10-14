@@ -1,5 +1,6 @@
 package com.yanhuan.authorization.controller;
 
+import com.yanhuan.authorization.constant.GrantTypeConstant;
 import com.yanhuan.authorization.dto.*;
 import com.yanhuan.authorization.util.AuthUtil;
 import com.yanhuan.authorization.util.URLParamsUtil;
@@ -23,7 +24,11 @@ public class AuthorizationController {
 
     static Map<String, String> reqidMap = new HashMap<>();
 
+    static Map<String, String> refreshAccessMap = new HashMap<>();
+
     static Map<String, String[]> codeScopeMap = new HashMap<>();
+
+    static Map<String, String[]> tokenScopeMap = new HashMap<>();
 
 
     /**
@@ -104,6 +109,83 @@ public class AuthorizationController {
                 codeResultDTO.setToAppUrl(toAppUrl);
                 return toAppUrl;
             }
+        }
+        return null;
+    }
+
+
+    /**
+     * 获取访问令牌
+     *
+     * @param tokenRequestDTO 令牌获取
+     */
+    @ResponseBody
+    @PostMapping("/token")
+    public String getToken(@RequestBody TokenRequestDTO tokenRequestDTO) {
+        if (!AppInfo.APP_ID.equals(tokenRequestDTO.getAppId())) {
+            return "app_id is not available";
+        }
+        if (!AppInfo.APP_SECRET.equals(tokenRequestDTO.getAppSecret())) {
+            return "app_secret is not available";
+        }
+        //处理授权码流程中的 颁发访问令牌 环节
+        if (GrantTypeConstant.AUTHORIZATION_CODE.equals(tokenRequestDTO.getGrantType())) {
+            //验证code值
+            if (!AuthUtil.isExistCode(tokenRequestDTO.getCode())) {
+                return "code is error";
+            }
+
+            //授权码一旦被使用，须要立即作废
+            AuthUtil.codeMap.remove(tokenRequestDTO.getCode());
+
+            //生成访问令牌access_token的值  user在生成code时和code进项了绑定  所以这里可以拿到
+            String accessToken = AuthUtil.generateAccessToken(tokenRequestDTO.getAppId(), "USERTEST");
+
+            //授权范围与访问令牌绑定
+            tokenScopeMap.put(accessToken, codeScopeMap.get(tokenRequestDTO.getCode()));
+
+            //生成刷新令牌refresh_token的值
+            String refreshToken = AuthUtil.generateRefreshToken(tokenRequestDTO.getCode(), "USERTEST");
+
+            //将accessToken和refreshToken做绑定
+            refreshAccessMap.put(refreshToken, accessToken);
+
+            //将refreshToken和codeScopeMap做绑定
+            tokenScopeMap.put(refreshToken, codeScopeMap.get(tokenRequestDTO.getCode()));
+            return accessToken + "|" + refreshToken;
+
+        } else if (GrantTypeConstant.REFRESH_TOKEN.equals(tokenRequestDTO.getGrantType())) {
+            //处理刷新令牌请求环节
+            String refreshToken = tokenRequestDTO.getRefreshToken();
+            if (!AuthUtil.refreshTokenMap.containsKey(refreshToken)) {
+                //该refresh_token值不存在
+                return "refreshToken is not exist";
+            }
+
+            String appStr = AuthUtil.refreshTokenMap.get("refresh_token");
+            if (!appStr.startsWith(tokenRequestDTO.getAppId() + "|" + "USERTEST")) {
+                //该refresh_token值 不是颁发给该 第三方软件的
+                return "No permission";
+            }
+
+            //生成访问令牌access_token的值
+            String accessToken = AuthUtil.generateAccessToken(tokenRequestDTO.getAppId(), "USERTEST");
+            // 删除旧的access_token 、删除旧的refresh_token、
+            AuthUtil.tokenMap.remove(refreshAccessMap.get(refreshToken));
+            AuthUtil.refreshTokenMap.remove(refreshToken);
+            tokenScopeMap.remove(refreshAccessMap.get(refreshToken));
+            tokenScopeMap.remove(refreshToken);
+            //生成新的refresh_token
+            String newRefreshToken = AuthUtil.generateRefreshToken(tokenRequestDTO.getCode(), "USERTEST");
+
+            //将accessToken和refreshToken做绑定
+            refreshAccessMap.put(newRefreshToken, accessToken);
+
+            //授权范围与访问令牌绑定
+            tokenScopeMap.put(accessToken, codeScopeMap.get(tokenRequestDTO.getCode()));
+            //将refreshToken和codeScopeMap做绑定
+            tokenScopeMap.put(refreshToken, codeScopeMap.get(tokenRequestDTO.getCode()));
+            return accessToken;
         }
         return null;
     }

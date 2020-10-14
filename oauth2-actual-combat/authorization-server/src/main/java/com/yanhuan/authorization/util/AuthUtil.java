@@ -15,19 +15,21 @@ import java.util.UUID;
  */
 public class AuthUtil {
 
-    //模拟授权码、令牌等数据存储
-    static Map<String,String> codeMap =  new HashMap<>();
+    /**
+     * 模拟授权码、令牌等数据存储
+     */
+    public static Map<String, String> codeMap = new HashMap<>();
 
-    static Map<String,String> tokenMap =  new HashMap<>();
+    public static Map<String, String> tokenMap = new HashMap<>();
 
-    static Map<String,String> refreshTokenMap =  new HashMap<>();
+    public static Map<String, String> refreshTokenMap = new HashMap<>();
 
     /**
      * 生成code值
      *
      * @return code值
      */
-    public static  String generateCode(String appId, String user) {
+    public static String generateCode(String appId, String user) {
         Random r = new Random();
         StringBuilder strb = new StringBuilder();
         for (int i = 0; i < 8; i++) {
@@ -47,17 +49,18 @@ public class AuthUtil {
     /**
      * 生成access_token值
      *
-     * @param appId
-     * @param user
-     * @return
+     * @param appId 应用ID
+     * @param user  用户信息
+     * @return token
      */
-    public static  String generateAccessToken(String appId, String user) {
+    public static String generateAccessToken(String appId, String user) {
 
         String accessToken = UUID.randomUUID().toString();
 
-        String expires_in = "1";//1天时间过期
+        //1天时间过期
+        String expiresIn = "1";
 
-        tokenMap.put(accessToken, appId + "|" + user + "|" + System.currentTimeMillis() + "|" + expires_in);//在这一篇章我们仅作为演示用，实际这应该是一个全局数据库,并且有有效期
+        tokenMap.put(accessToken, appId + "|" + user + "|" + System.currentTimeMillis() + "|" + expiresIn);//在这一篇章我们仅作为演示用，实际这应该是一个全局数据库,并且有有效期
 
         return accessToken;
     }
@@ -66,15 +69,16 @@ public class AuthUtil {
     /**
      * 生成refresh_token值
      *
-     * @param appId
-     * @param user
-     * @return
+     * @param appId 应用ID
+     * @param user  用户信息
+     * @return 刷新令牌
      */
-    public static  String generateRefreshToken(String appId, String user) {
+    public static String generateRefreshToken(String appId, String user) {
 
         String refreshToken = UUID.randomUUID().toString();
 
-        refreshTokenMap.put(refreshToken, appId + "|" + user + "|" + System.currentTimeMillis());//在这一篇章我们仅作为演示用，实际这应该是一个全局数据库,并且有有效期
+        //仅作为演示用，实际这应该是一个全局数据库,并且有有效期
+        refreshTokenMap.put(refreshToken, appId + "|" + user + "|" + System.currentTimeMillis());
 
         return refreshToken;
     }
@@ -82,28 +86,30 @@ public class AuthUtil {
     /**
      * 是否存在code值
      *
-     * @param code
-     * @return
+     * @param code code
+     * @return 验证结果
      */
-    public static  boolean isExistCode(String code) {
+    public static boolean isExistCode(String code) {
         return codeMap.containsKey(code);
     }
 
     /**
      * 验证权限
      *
-     * @param scope
-     * @return
+     * @param scope 权限范围
+     * @return 验证结果
      */
-    public static  boolean checkScope(String scope) {
+    public static boolean checkScope(String scope) {
         //简单模拟权限验证
         return AppInfo.SCOPE.contains(scope);
     }
 
 
     /**
-     * @param rscope
-     * @return
+     * 验证权限
+     *
+     * @param rscope 权限范围
+     * @return 验证结果
      */
     public static boolean checkScope(String[] rscope) {
         StringBuilder scope = new StringBuilder();
