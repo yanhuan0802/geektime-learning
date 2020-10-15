@@ -1,7 +1,10 @@
 package com.yanhuan.authorization.util;
 
 import com.yanhuan.authorization.dto.AppInfo;
+import io.jsonwebtoken.*;
 
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -55,14 +58,39 @@ public class AuthUtil {
      */
     public static String generateAccessToken(String appId, String user) {
 
-        String accessToken = UUID.randomUUID().toString();
+        String sharedTokenSecret = UUID.randomUUID().toString();
+
+        Key key = new SecretKeySpec(sharedTokenSecret.getBytes(), SignatureAlgorithm.HS256.getJcaName());
+
+        Map<String, Object> headerMap = new HashMap<>();
+        headerMap.put("typ", "JWT");
+        headerMap.put("alg", "HS256");
+
+        Map<String, Object> payloadMap = new HashMap<>();
+        payloadMap.put("iss", "http://localhost:8081/");
+        payloadMap.put("sub", "XIAOMINGTEST");
+        payloadMap.put("aud", "APPID_RABBIT");
+        payloadMap.put("exp", 1584105790703L);
+        payloadMap.put("iat", 1584105948372L);
+        //生成JWT令牌
+        String jwts = Jwts.builder()
+                .setHeaderParams(headerMap)
+                .setClaims(payloadMap)
+                .signWith(SignatureAlgorithm.HS256, key)
+                .compact();
 
         //1天时间过期
         String expiresIn = "1";
 
-        tokenMap.put(accessToken, appId + "|" + user + "|" + System.currentTimeMillis() + "|" + expiresIn);//在这一篇章我们仅作为演示用，实际这应该是一个全局数据库,并且有有效期
+        //仅作为演示用，实际这应该是一个全局数据库,并且有有效期
+        tokenMap.put(jwts, appId + "|" + user + "|" + System.currentTimeMillis() + "|" + expiresIn);
 
-        return accessToken;
+        //解析JWT令牌
+        Jws<Claims> claimsJws = Jwts.parser().setSigningKey(key).parseClaimsJws(jwts);
+        JwsHeader header = claimsJws.getHeader();
+        Claims body = claimsJws.getBody();
+        //解析时错误说明：JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
+        return jwts;
     }
 
 
