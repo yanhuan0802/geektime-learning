@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * JWT test
+ * JWT test  OIDC
+ *
  * @author Wang
  */
 public class JWTTest {
@@ -52,7 +53,11 @@ public class JWTTest {
         return null;
     }*/
 
-
+    /**
+     * OIDC协议生成ID令牌
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         String sharedTokenSecret = "hellooauthhellooauthhellooauthhellooauth";
         Key key = new SecretKeySpec(sharedTokenSecret.getBytes(),

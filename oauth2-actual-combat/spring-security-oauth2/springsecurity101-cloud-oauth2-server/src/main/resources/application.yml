@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: oauth2-server
+  datasource:
+    url: jdbc:mysql://localhost:3306/oauth?useSSL=false
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
+  flyway:
+    enabled: true
+    encoding: UTF-8
+    locations: classpath:db/migration
+    sql-migration-prefix: V
+    sql-migration-separator: __
+    sql-migration-suffixes: .sql
+    baseline-on-migrate: on
+    validate-on-migrate: on
+    baseline-version: 1.0.0
