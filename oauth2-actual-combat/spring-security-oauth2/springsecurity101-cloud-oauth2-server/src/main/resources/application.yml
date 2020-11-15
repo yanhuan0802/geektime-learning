@@ -5,10 +5,10 @@ spring:
   application:
     name: oauth2-server
   datasource:
-    url: jdbc:mysql://localhost:3306/oauth?useSSL=false
+    url: jdbc:mysql://101.200.150.234:3306/oauth?characterEncoding=utf8&autoReconnect=true&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: root
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
   flyway:
     enabled: true
     encoding: UTF-8

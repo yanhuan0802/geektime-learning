@@ -25,7 +25,7 @@ import java.util.Arrays;
 
 
 /**
- * 配置授权服务器
+ * 核心：配置授权服务器
  *
  * @author YanHuan
  * @date 2020-11-07 15:30
@@ -46,7 +46,8 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
     /**
      * 我们配置了使用数据库来维护客户端信息。
      * 虽然在各种Demo中我们经常看到的是在内存中维护客户端信息，通过配置直接写死在这里。
-     * 但是，对于实际的应用我们一般都会用数据库来维护这个信息，甚至还会建立一套工作流来允许客户端自己申请ClientID，实现OAuth客户端接入的审批。
+     * 但是，对于实际的应用我们一般都会用数据库来维护这个信息，
+     * 甚至还会建立一套工作流来允许客户端自己申请ClientID，实现OAuth客户端接入的审批。
      *
      * @param clients 客户端配置
      * @throws Exception 异常抛出
@@ -57,7 +58,7 @@ public class OAuth2ServerConfiguration extends AuthorizationServerConfigurerAdap
     }
 
     /**
-     * 这里干了两件事儿。首先，打开了验证Token的访问权限（以便之后我们演示）。
+     * 首先，打开了验证Token的访问权限（以便之后我们演示）。
      * 然后，允许ClientSecret明文方式保存，并且可以通过表单提交（而不仅仅是Basic Auth方式提交），之后会演示到这个。
      *
      * @param security 服务端配置

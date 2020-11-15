@@ -10,7 +10,7 @@
     <artifactId>springsecurity101-cloud-oauth2-server</artifactId>
 
     <properties>
-        <flyway.version>6.3.0</flyway.version>
+        <flyway.version>5.2.4</flyway.version>
     </properties>
 
     <dependencies>
